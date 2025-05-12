@@ -1,0 +1,3 @@
+Company,Product Name,Regular Price,Special Price,Transport,Purchase GST,Transport Price,Distributor Price,Special Sale,Institutional,B2C,MRP,Sale GST
+"3M, Inc.","Sterile Gloves, Large",100.00,90.00,No,5,10.00,120.00,110.00,115.00,130.00,150.00,5
+Matha,"Surgical Mask, Pack of 50",50.00,45.00,Yes,5,0.00,60.00,55.00,58.00,65.00,70.00,5

@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quotation System</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="logo-container">
+  <img src="images/rao.png" alt="Surgi-World Logo" class="logo" />
+  <button class="btn1" id="logout">Logout</button></div>
+  <h1>Product Details Portal - Surgi-World</h1>
+  
+  <div class="card">
+    <h2>Add Product</h2>
+    <form id="product-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Company Name</label>
+          <select id="company-name">
+            <option value="Matha" selected>Matha</option>
+            <option value="3M">3M</option>
+            <option value="Abbott">Abbott</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Product Name</label>
+          <input type="text" id="product-name" placeholder="Product Name" required>
+        </div>
+      </div>
+
+      <h3>Purchase Details</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Regular Price</label>
+          <input type="number" step="0.01" id="regular-price" required>
+        </div>
+        <div class="form-group">
+          <label>Special Price</label>
+          <input type="number" step="0.01" id="special-price" required>
+        </div>
+        <div class="form-group">
+          <label>Price Type</label>
+          <div class="price-type-selector">
+            <label>
+              <input type="radio" name="price-type" value="regular" checked>
+              Regular Price
+            </label>
+            <label>
+              <input type="radio" name="price-type" value="special">
+              Special Price
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Transport Included</label>
+          <select class="form-control" id="transport-included">
+            <option value="Yes" selected>Yes</option>
+            <option value="No">No</option>
+          </select>
+        </div>
+        <div class="form-group" id="transport-price-group" style="display: none;">
+          <label>Transport Price</label>
+          <input type="number" class="form-control" step="0.01" id="transport-price">
+        </div>
+        <div class="form-group">
+          <label>Purchase GST (%)</label>
+          <select id="purchase-gst">
+            <option value="0">0%</option>
+            <option value="5" selected>5%</option>
+            <option value="12">12%</option>
+            <option value="18">18%</option>
+          </select>
+        </div>
+      </div>
+      
+
+      <h3>Sale Details</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Distributor Price</label>
+          <input type="number" step="0.01" id="distributor-price" required>
+        </div>
+        <div class="form-group">
+          <label>Special Sale Price</label>
+          <input type="number" step="0.01" id="special-sale-price" required>
+        </div>
+        <div class="form-group">
+          <label>Institutional Price</label>
+          <input type="number" step="0.01" id="institutional-price" required>
+        </div>
+        <div class="form-group">
+          <label>B2C Price</label>
+          <input type="number" step="0.01" id="b2c-price" required>
+        </div>
+        <div class="form-group">
+          <label>MRP</label>
+          <input type="number" step="0.01" id="mrp-price" required>
+        </div>
+        <div class="form-group">
+          <label>Sale GST (%)</label>
+          <select id="sale-gst">
+            <option value="0">0%</option>
+            <option value="5" selected>5%</option>
+            <option value="12">12%</option>
+            <option value="18">18%</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn" id="submitProductBtn">Add Product</button>
+      <button type="button" class="btn" id="cancelEditBtn" style="display: none; background-color: #dc3545; margin-left: 10px;">Cancel</button>
+    </form>
+
+    <h3>Upload CSV</h3>
+    <div class="form-group">
+      <input type="file" id="csvFileInput" accept=".csv" style="margin: 10px 0;">
+      <button id="uploadCsvBtn" class="btn">Upload CSV</button>
+    </div>
+  </div>
+
+  <h2>Products</h2>
+  <div class="search-container">
+    <input type="text" id="search-input" placeholder="Search by product name or company...">
+  </div>
+</div>
+  <table id="productTable">
+    <thead>
+      <tr>
+        <th>S.No</th>
+        <th>Company</th>
+        <th>Product Name</th>
+        <th>Regular Price</th>
+        <th>Special Price</th>
+        <th>Transport</th>
+        <th>Purchase GST</th>
+        <th class="gap">Purchase Price</th>
+        <th>Distributor Price</th>
+        <th>Special Sale</th>
+        <th>Institutional</th>
+        <th>B2C</th>
+        <th>MRP</th>
+        <th>Sale GST</th>
+        <th>Sale Price <br>(distributor-price)</th>
+        <th>Actions</th>
+        <th>Manage</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  
+  <h2 style="margin-top: 30px;">Generate Quotation</h2>
+  <div style="text-align: center; margin-top: 20px;">
+    <button class="btn" id="createQuotationBtn">Create Quotation</button>
+  </div>
+
+  <!-- Quotation Popup -->
+  <div id="quotationPopup" class="popup">   
+    <div class="popup-content" id="receiverPopup">    
+      <button class="close-popup" onclick="closeReceiverPopup()" id="closeReceiverBtn">×</button>
+      <h2>Enter Receiver Details</h2>
+      <form id="receiver-form">
+        <div class="form-group">
+          <label for="receiver-name">Receiver Name</label>
+          <input type="text" id="receiver-name" placeholder="Enter receiver name" required>
+        </div>
+        <div class="form-group">
+          <label for="receiver-organization">Organization</label>
+          <input type="text" id="receiver-organization" placeholder="Enter organization" required>
+        </div>
+        <div class="form-group">
+          <label for="receiver-address">Address</label>
+          <textarea id="receiver-address" rows="3" placeholder="Enter address" required></textarea>
+        </div>
+        <div style="text-align: center; margin-top: 20px;">
+          <button type="submit" class="btn">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Final Quotation Popup -->
+  <div id="finalQuotationPopup" class="popup" style="display:none;">
+    <div class="popup-content" style="width: 90%; max-width: 900px;">
+      <p style="text-align: left;margin-bottom:10px ;font-size:12px;">QUOTATION</p>
+      <img src="images/rao.png" style="width: 200px; height: auto; margin-bottom: 10px;" >
+      <div style="margin-bottom: 10px; text-align: left; font-size: 14px;">
+        <h2>Surgi-World</h2>
+        17106 3, Premises At Canara Work Shop Ltd<br>
+        MAROLI, MANGALORE-575005<br>
+        Email: info@surgiworld.com | Phone: +91 123 456 7890
+      </div>
+
+      <div style="text-align: left; font-size: 14px; margin-bottom: 20px;">
+        <p><strong>To,</strong></p>
+        <p id="receiverDetails"></p>
+        <p><strong>Respected Sir/Madam,</strong></p>
+        <p><strong>Sub: QUOTATION</strong></p>
+      </div>
+
+      <table id="quotationTable" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <thead>
+          <tr style="background-color: #007bff; color: white;">
+            <th>S.No.</th>
+            <th>Item</th>
+            <th>Company</th>
+            <th>Price Type</th>
+            <th>Quantity</th>
+            <th>Rate/Unit</th>
+            <th>GST Amount</th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Quoted products inserted here -->
+        </tbody>
+      </table>
+
+      <div style="text-align: right; font-size: 18px; margin-bottom: 20px;">
+        Grand Total: ₹<span id="grandTotal">0.00</span>
+      </div>
+
+      <div style="font-size: 14px; margin-bottom: 20px;">
+        <p style="margin-bottom: 5px;font-size: 19px ">Terms & Conditions:</p>
+        <ol style="margin-top: 5px; padding-left: 20px; font-size: 14px; line-height: 1.5;">
+            <li>Payment Terms: 30 Days</li>
+            <li>Supply within 10 to 15 days from the date of Purchase Orders</li>
+            <li>Inclusive of GST</li>
+        </ol><br>
+        <p>Thanking you Regards,</p>
+        <p>For Surgi-World, Mangalore</p>
+        <p style="font-weight:bold;"> Ashok Rao</p>
+      </div>
+      <div style="text-align: right;">
+        <button class="btn" onclick="closeFinalQuotation()">Close</button>
+        <button class="btn" style="margin-left: 10px;" onclick="downloadPDF()">Download PDF</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="javascript.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Surgi-World Quotation System - Login</title>
+  <link rel="stylesheet" href="login.css" />
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.9.0/dist/axios.min.js"></script>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo-container">
+      <img src="images/rao.png" alt="Surgi-World Logo" class="logo" />
+    </div>
+    <h2>Surgi-World Quotation System</h2>
+
+    <!-- Login Form -->
+    <form id="login-form" class="login-form">
+      <div class="form-group">
+        <label for="login-email">Email or Mobile Number</label>
+        <input type="text" id="login-email" placeholder="Enter your email or mobile" required />
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="Enter your password" required />
+      </div>
+      <button type="submit" class="login-btn">Login</button>
+      <p>Don't have an account? <a href="#" onclick="toggleForms()">Sign Up</a></p>
+    </form>
+    
+    <!-- Signup Form -->
+    <form id="signup-form" class="login-form hidden">
+      <div class="form-group">
+        <label for="signup-email">Email</label>
+        <input type="text" id="signup-email" placeholder="Enter email" required />
+      </div>
+      <div class="form-group">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" placeholder="Create a password" required />
+      </div>
+      <button type="submit" class="login-btn">Sign Up</button>
+      <p>Already have an account? <a href="#" onclick="toggleForms()">Login</a></p>
+    </form>
+  </div>
+
+  <script src="index.js"></script>
+  <a href="home.html"></a>
+</body>
+</html>

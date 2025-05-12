@@ -1,0 +1,348 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  
+  background-color: #f9f9f9;
+}
+
+.container {
+ 
+  margin: 0 auto;
+}
+.logo {
+  width: 363px;           
+  height: 110px;
+  object-fit: cover;      
+  border-radius: 10px;
+  margin-bottom: 25px;  
+  /* border:1px solid red   */
+}
+.logo-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+.btn1 {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: -100px;
+}
+h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+form {
+  margin-top: 10px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+select, input[type="text"], input[type="file"], input[type="number"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+input[disabled] {
+  background-color: #eee;
+}
+
+.btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+}
+
+.search-container {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+#search-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+#productTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+#productTable th, #productTable td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+#productTable th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+#productTable tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.transport-type {
+  margin-top: 10px;
+}
+
+.transport-type label {
+  margin-right: 20px;
+  font-size: 14px;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  padding: 30px;
+  background-color: #f9f9f9;
+}
+
+.container {
+ 
+  margin: 0 auto;
+}
+
+h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+form {
+  margin-top: 10px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.form-row .form-group {
+  flex: 1;
+  min-width: 150px;
+}
+select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+input[type="text"],
+input[type="file"],
+input[type="number"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+input[disabled] {
+  background-color: #eee;
+}
+
+.btn {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.btn:hover {
+  background-color: #0056b3;
+}
+
+
+.search-container {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+#search-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
+
+#productTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+#productTable th, #productTable td {
+ 
+  padding: 8px;
+  text-align: center;
+}
+#productTable th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+#productTable tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+#productTable .gap {
+border-right:15px solid #dddddd /* darker divider */
+}
+
+/* Your previous CSS exactly same as you shared, plus: */
+.transport-type {
+  margin-top: 10px;
+}
+.transport-type label {
+  margin-right: 20px;
+  font-size: 14px;
+}
+
+
+/* Popup Styling */
+.popup {
+  display: none; /* hidden by default */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 999;
+  justify-content: center;
+  align-items: center;
+  line-height: 1.5;
+}
+
+.popup-content {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+  text-align: left;
+}
+.popup-content h2 {
+  margin-bottom: 0px;
+}
+.popup-content .form-group {
+  margin-bottom: 15px;
+}
+.popup-content textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  width: 100%;
+  resize: none;
+}
+
+.close-popup {
+  background: none;
+  border: none;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  margin-left: 95%;
+}
+
+.close-popup:hover {
+  color: red;
+}
+.quoted-item {
+  background-color: #f0fff4 !important;
+  transition: background-color 0.3s ease;
+}
