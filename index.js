@@ -1,53 +1,57 @@
-import express from "express";
-import "dotenv/config";
-import cors from "cors";
-import { configs } from "./configs/env.js";
-import defaultrouter from "./routes/routes.js";
-import { sequelize } from "./configs/db.js";
-
-const app = express();
-
-// ✅ Allowed origins
-const allowedOrigins = [
-  "https://quotation-frontend-mocha.vercel.app",
-  "http://localhost:8000",
-  "http://localhost:3000"
-];
-
-// ✅ CORS setup
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`❌ CORS blocked request from: ${origin}`);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-}));
-
-// ✅ JSON parser (modern)
-app.use(express.json());
-
-// ✅ Route setup
-app.use("/", defaultrouter);
-
-// ✅ 404 route
-app.use((req, res) => {
-  res.status(404).json({ error: "Resource not found" });
-});
-
-// ✅ Server start
-const port = configs.port || process.env.PORT || 3000;
-app.listen(port, async () => {
-  console.log(`✅ Server is running on port: ${port}`);
-  try {
-    await sequelize.authenticate();
-    console.log("✅ Database connection established successfully.");
-  } catch (error) {
-    console.error("❌ DB connection error:", error.message);
+// Toggle between login and signup forms
+function toggleForms() {
+    document.getElementById("login-form").classList.toggle("hidden");
+    document.getElementById("signup-form").classList.toggle("hidden");
   }
-});
-
-export default app;
+  
+  // SIGNUP logic
+  document.getElementById("signup-form").addEventListener("submit", async function (e) {
+      e.preventDefault();
+    const email = document.getElementById("signup-email").value;
+    const password = document.getElementById("signup-password").value;
+  
+      const payload = {
+          "email": email,
+          "password": password
+      }
+      try {
+        let result = await axios.post("http://localhost:8000/signup", payload)
+          console.log("Signed up successfully created", result.status)
+          alert("Signedup successfully")
+          document.getElementById("signup-form").classList.add("hidden");
+          document.getElementById("login-form").classList.remove("hidden");
+      } catch (error) {
+          console.log(error.response.data.message)
+      }
+  });
+  
+  // LOGIN logic
+  document.getElementById("login-form").addEventListener("submit", async function (e) {
+    e.preventDefault();
+  console.log("Inside login logic")
+    const email = document.getElementById("login-email").value;
+    const password = document.getElementById("login-password").value;
+  
+    try {
+      const response = await axios.post("http://localhost:8000/signin", {
+        email,
+        password
+      });
+        
+        console.log(response.status === 200)
+        if (response.status === 200) {
+            alert("Logged in successfully");
+            window.location.href = "home.html"; 
+            localStorage.setItem("email", email);
+            localStorage.setItem("product", response.data.details.processingData|| "");
+            
+      } else {
+        alert(response.data.message || "Login failed.");
+      }
+  
+    } catch (error) {
+        console.error("Login error:", error);
+        console.log(error)
+      alert(error.response?.data?.message || "Server error. Please try again.");
+    }
+  });
