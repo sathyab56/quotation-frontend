@@ -205,39 +205,63 @@ function updatePurchasePriceDisplay() {
     document.querySelector('.gap').textContent = purchasePrice;
 }
 
-// Save product function
-function saveProduct() {
+async function saveProduct() {
     const productData = {
         company: document.getElementById('company-name').value,
-        productName: document.getElementById('product-name').value,
-        regularPrice: parseFloat(document.getElementById('regular-price').value) || 0,
-        specialPrice: parseFloat(document.getElementById('special-price').value) || 0,
-        transportIncluded: document.getElementById('transport-included').value,
-        transportPrice: parseFloat(document.getElementById('transport-price').value) || 0,
-        priceType: document.querySelector('input[name="price-type"]:checked').value,
-        purchaseGST: document.getElementById('purchase-gst').value,
-        distributorPrice: parseFloat(document.getElementById('distributor-price').value) || 0,
-        specialSalePrice: parseFloat(document.getElementById('special-sale-price').value) || 0,
-        institutionalPrice: parseFloat(document.getElementById('institutional-price').value) || 0,
-        b2cPrice: parseFloat(document.getElementById('b2c-price').value) || 0,
-        mrpPrice: parseFloat(document.getElementById('mrp-price').value) || 0,
-        saleGST: document.getElementById('sale-gst').value
+        product_name: document.getElementById('product-name').value,
+        regular_price: parseFloat(document.getElementById('regular-price').value) || 0,
+        special_price: parseFloat(document.getElementById('special-price').value) || 0,
+        transport: parseFloat(document.getElementById('transport-price').value) || 0,
+        purchase_gst: parseFloat(document.getElementById('purchase-gst').value) || 0,
+        purchase_price: calculatePurchasePrice({
+            ...productData,
+            priceType: document.querySelector('input[name="price-type"]:checked').value
+        }),
+        distributor_price: parseFloat(document.getElementById('distributor-price').value) || 0,
+        special_sale: parseFloat(document.getElementById('special-sale-price').value) || 0,
+        institutional: parseFloat(document.getElementById('institutional-price').value) || 0,
+        b2c: parseFloat(document.getElementById('b2c-price').value) || 0,
+        mrp: parseFloat(document.getElementById('mrp-price').value) || 0,
+        sale_gst: parseFloat(document.getElementById('sale-gst').value) || 0,
+        sale_price: (
+            parseFloat(document.getElementById('distributor-price').value || 0) *
+            (1 + parseFloat(document.getElementById('sale-gst').value || 0) / 100)
+        ).toFixed(2)
     };
 
-    const purchasePrice = calculatePurchasePrice(productData);
-    const salePrice = (productData.distributorPrice * (1 + parseFloat(productData.saleGST) / 100)).toFixed(2);
+    try {
+        // Post to backend
+        const response = await fetch(`${BASE_URL}/products`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(productData)
+        });
 
-    if (editingIndex !== null) {
-        products[editingIndex] = productData;
-        updateTableRow(editingIndex, productData, purchasePrice, salePrice);
-    } else {
-        products.push(productData);
-        addTableRow(products.length - 1, productData, purchasePrice, salePrice);
+        if (!response.ok) {
+            throw new Error('Failed to save product to backend');
+        }
+
+        // Save locally for UI updates
+        if (editingIndex !== null) {
+            products[editingIndex] = productData;
+            updateTableRow(editingIndex, productData, productData.purchase_price, productData.sale_price);
+        } else {
+            products.push(productData);
+            addTableRow(products.length - 1, productData, productData.purchase_price, productData.sale_price);
+        }
+
+        saveToLocalStorage();
+        resetForm();
+        alert("Product saved to database successfully!");
+
+    } catch (err) {
+        console.error("Error saving product:", err);
+        alert("Error saving product to backend. Please check your connection.");
     }
-
-    saveToLocalStorage();
-    resetForm();
 }
+
 
 // Rest of the code remains the same until quotation functions...
 
