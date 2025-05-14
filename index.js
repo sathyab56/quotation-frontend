@@ -13,7 +13,7 @@ document.getElementById("signup-form").addEventListener("submit", async function
   const payload = { email, password };
 
   try {
-    const result = await axios.post("http://localhost:10000/signup", payload);
+    const result = await axios.post("https://quotation-backend-2vww.onrender.com/signup", payload);
     console.log("Signed up successfully", result.status);
     alert("Signed up successfully");
     window.location.href = "index.html";
@@ -33,10 +33,8 @@ document.getElementById("login-form").addEventListener("submit", async function 
   const password = document.getElementById("login-password").value;
 
   try {
-    const response = await axios.post("http://localhost:10000/signin", {
-      email,
-      password
-    });
+    const response = await axios.post("https://quotation-backend-2vww.onrender.com/signin", { email, password });
+
 
     if (response.status === 200) {
       alert("Logged in successfully");
