@@ -15,7 +15,7 @@ function toggleForms() {
           "password": password
       }
       try {
-        let result = await axios.post("http://localhost:8000/signup", payload)
+        let result = await axios.post("http://localhost:10000/signup", payload)
           console.log("Signed up successfully created", result.status)
           alert("Signedup successfully")
           window.location.href = "index.html";
@@ -32,7 +32,7 @@ function toggleForms() {
     const password = document.getElementById("login-password").value;
     
     try {
-      const response = await axios.post("http://localhost:8000/signin", {
+      const response = await axios.post("http://localhost:10000/signin", {
         email,
         password
       });
