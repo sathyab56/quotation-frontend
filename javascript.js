@@ -10,7 +10,7 @@ const cancelEditBtn = document.getElementById('cancelEditBtn');
 const BASE_URL = "https://quotation-backend-2vww.onrender.com";
 
 // Example usage:
-fetch(`${BASE_URL}/api/users`)
+fetch("https://quotation-backend-2vww.onrender.com/api/users")
 
 
 // Initialize the app
@@ -231,7 +231,7 @@ productData.sale_price = (
 
     try {
         // Post to backend
-        const response = await fetch(`${BASE_URL}/products`, {
+        const response = await fetch("https://quotation-backend-2vww.onrender.com/products", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
