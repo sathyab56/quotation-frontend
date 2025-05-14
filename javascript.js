@@ -10,7 +10,7 @@ const cancelEditBtn = document.getElementById('cancelEditBtn');
 const BASE_URL = "https://quotation-backend-2vww.onrender.com";
 
 // Example usage:
-fetch("https://quotation-backend-2vww.onrender.com/api/users")
+fetch("https://quotation-backend-2vww.onrender.com/products")
 
 
 // Initialize the app
@@ -207,31 +207,36 @@ function updatePurchasePriceDisplay() {
 
 async function saveProduct() {
     const productData = {
-    company: document.getElementById('company-name').value,
-    product_name: document.getElementById('product-name').value,
-    regular_price: parseFloat(document.getElementById('regular-price').value) || 0,
-    special_price: parseFloat(document.getElementById('special-price').value) || 0,
-    transport: parseFloat(document.getElementById('transport-price').value) || 0,
-    purchase_gst: parseFloat(document.getElementById('purchase-gst').value) || 0,
-    distributor_price: parseFloat(document.getElementById('distributor-price').value) || 0,
-    special_sale: parseFloat(document.getElementById('special-sale-price').value) || 0,
-    institutional: parseFloat(document.getElementById('institutional-price').value) || 0,
-    b2c: parseFloat(document.getElementById('b2c-price').value) || 0,
-    mrp: parseFloat(document.getElementById('mrp-price').value) || 0,
-    sale_gst: parseFloat(document.getElementById('sale-gst').value) || 0,
-    priceType: document.querySelector('input[name="price-type"]:checked').value,
-};
+        company: document.getElementById('company-name').value,
+        productName: document.getElementById('product-name').value,
+        regularPrice: parseFloat(document.getElementById('regular-price').value) || 0,
+        specialPrice: parseFloat(document.getElementById('special-price').value) || 0,
+        transportIncluded: document.getElementById('transport-included').value,
+        transportPrice: parseFloat(document.getElementById('transport-price').value) || 0,
+        purchaseGST: document.getElementById('purchase-gst').value || '5',
+        distributorPrice: parseFloat(document.getElementById('distributor-price').value) || 0,
+        specialSalePrice: parseFloat(document.getElementById('special-sale-price').value) || 0,
+        institutionalPrice: parseFloat(document.getElementById('institutional-price').value) || 0,
+        b2cPrice: parseFloat(document.getElementById('b2c-price').value) || 0,
+        mrpPrice: parseFloat(document.getElementById('mrp-price').value) || 0,
+        saleGST: document.getElementById('sale-gst').value || '5',
+        priceType: document.querySelector('input[name="price-type"]:checked').value
+    };
 
-productData.purchase_price = calculatePurchasePrice(productData);
-productData.sale_price = (
-    parseFloat(productData.distributor_price) * 
-    (1 + parseFloat(productData.sale_gst) / 100)
-).toFixed(2);
+    // Calculate prices
+    const basePrice = productData.priceType === 'special'
+        ? productData.specialPrice
+        : productData.regularPrice;
 
+    const subtotal = basePrice + (productData.transportIncluded === 'No' ? productData.transportPrice : 0);
+    const purchaseGST = parseFloat(productData.purchaseGST || 0);
+    productData.purchasePrice = (subtotal * (1 + purchaseGST / 100)).toFixed(2);
+
+    const saleGST = parseFloat(productData.saleGST || 0);
+    productData.salePrice = (productData.distributorPrice * (1 + saleGST / 100)).toFixed(2);
 
     try {
-        // Post to backend
-        const response = await fetch("https://quotation-backend-2vww.onrender.com/products", {
+        const response = await fetch(`${BASE_URL}/products`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -243,24 +248,25 @@ productData.sale_price = (
             throw new Error('Failed to save product to backend');
         }
 
-        // Save locally for UI updates
+        // Save locally for UI purposes
         if (editingIndex !== null) {
             products[editingIndex] = productData;
-            updateTableRow(editingIndex, productData, productData.purchase_price, productData.sale_price);
+            updateTableRow(editingIndex, productData, productData.purchasePrice, productData.salePrice);
         } else {
             products.push(productData);
-            addTableRow(products.length - 1, productData, productData.purchase_price, productData.sale_price);
+            addTableRow(products.length - 1, productData, productData.purchasePrice, productData.salePrice);
         }
 
         saveToLocalStorage();
         resetForm();
-        alert("Product saved to database successfully!");
+        alert("✅ Product saved to backend!");
 
     } catch (err) {
-        console.error("Error saving product:", err);
-        alert("Error saving product to backend. Please check your connection.");
+        console.error("❌ Error saving product:", err);
+        alert("❌ Failed to save product. Check backend or network connection.");
     }
 }
+
 
 
 // Rest of the code remains the same until quotation functions...
