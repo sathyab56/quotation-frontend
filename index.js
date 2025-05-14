@@ -36,7 +36,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
 
 
   try {
-    const response = await axios.post("https://quotation-backend-2vww.onrender.com/signin", { email, password });
+    const response = await axios.get("https://quotation-backend-2vww.onrender.com/signin", { email, password });
 
 
     if (response.status === 200) {
