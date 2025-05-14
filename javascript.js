@@ -207,27 +207,27 @@ function updatePurchasePriceDisplay() {
 
 async function saveProduct() {
     const productData = {
-        company: document.getElementById('company-name').value,
-        product_name: document.getElementById('product-name').value,
-        regular_price: parseFloat(document.getElementById('regular-price').value) || 0,
-        special_price: parseFloat(document.getElementById('special-price').value) || 0,
-        transport: parseFloat(document.getElementById('transport-price').value) || 0,
-        purchase_gst: parseFloat(document.getElementById('purchase-gst').value) || 0,
-        purchase_price: calculatePurchasePrice({
-            ...productData,
-            priceType: document.querySelector('input[name="price-type"]:checked').value
-        }),
-        distributor_price: parseFloat(document.getElementById('distributor-price').value) || 0,
-        special_sale: parseFloat(document.getElementById('special-sale-price').value) || 0,
-        institutional: parseFloat(document.getElementById('institutional-price').value) || 0,
-        b2c: parseFloat(document.getElementById('b2c-price').value) || 0,
-        mrp: parseFloat(document.getElementById('mrp-price').value) || 0,
-        sale_gst: parseFloat(document.getElementById('sale-gst').value) || 0,
-        sale_price: (
-            parseFloat(document.getElementById('distributor-price').value || 0) *
-            (1 + parseFloat(document.getElementById('sale-gst').value || 0) / 100)
-        ).toFixed(2)
-    };
+    company: document.getElementById('company-name').value,
+    product_name: document.getElementById('product-name').value,
+    regular_price: parseFloat(document.getElementById('regular-price').value) || 0,
+    special_price: parseFloat(document.getElementById('special-price').value) || 0,
+    transport: parseFloat(document.getElementById('transport-price').value) || 0,
+    purchase_gst: parseFloat(document.getElementById('purchase-gst').value) || 0,
+    distributor_price: parseFloat(document.getElementById('distributor-price').value) || 0,
+    special_sale: parseFloat(document.getElementById('special-sale-price').value) || 0,
+    institutional: parseFloat(document.getElementById('institutional-price').value) || 0,
+    b2c: parseFloat(document.getElementById('b2c-price').value) || 0,
+    mrp: parseFloat(document.getElementById('mrp-price').value) || 0,
+    sale_gst: parseFloat(document.getElementById('sale-gst').value) || 0,
+    priceType: document.querySelector('input[name="price-type"]:checked').value,
+};
+
+productData.purchase_price = calculatePurchasePrice(productData);
+productData.sale_price = (
+    parseFloat(productData.distributor_price) * 
+    (1 + parseFloat(productData.sale_gst) / 100)
+).toFixed(2);
+
 
     try {
         // Post to backend
