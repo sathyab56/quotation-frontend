@@ -18,8 +18,7 @@ function toggleForms() {
         let result = await axios.post("http://localhost:8000/signup", payload)
           console.log("Signed up successfully created", result.status)
           alert("Signedup successfully")
-          document.getElementById("signup-form").classList.add("hidden");
-          document.getElementById("login-form").classList.remove("hidden");
+          window.location.href = "index.html";
       } catch (error) {
           console.log(error.response.data.message)
       }
@@ -31,7 +30,7 @@ function toggleForms() {
   console.log("Inside login logic")
     const email = document.getElementById("login-email").value;
     const password = document.getElementById("login-password").value;
-  
+    
     try {
       const response = await axios.post("http://localhost:8000/signin", {
         email,
