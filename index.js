@@ -31,6 +31,9 @@ document.getElementById("login-form").addEventListener("submit", async function 
 
   const email = document.getElementById("login-email").value;
   const password = document.getElementById("login-password").value;
+  console.log("Login email:", email);
+  console.log("Login password:", password);
+
 
   try {
     const response = await axios.post("https://quotation-backend-2vww.onrender.com/signin", { email, password });
