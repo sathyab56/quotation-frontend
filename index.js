@@ -16,6 +16,13 @@ document.getElementById("signup-form").addEventListener("submit", async function
         let result = await axios.post("https://quotation-backend-2vww.onrender.com/signup", payload);
         console.log("Signed up successfully created", result.status);
         alert("Signed up successfully");
+      
+
+// Hide signup form, show login form
+document.getElementById("signup-form").classList.add("hidden");
+document.getElementById("login-form").classList.remove("hidden");
+
+
     } catch (error) {
         console.log(error.response.data.message);
         alert(error.response?.data?.message || "Signup failed.");
