@@ -46,7 +46,8 @@ document.getElementById("login-form").addEventListener("submit", async function 
     }
 
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Login error:", error.response?.data || error.message);
+
     const message = error.response?.data?.message || "Server error. Please check connection.";
     alert(message);
   }
