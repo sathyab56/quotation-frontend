@@ -9,155 +9,161 @@ const submitBtn = document.getElementById('submitProductBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 const BASE_URL = "https://quotation-backend-2vww.onrender.com";
 
-// Example usage:
-fetch(`${BASE_URL}/api/users`)
+// Load products from backend
+async function loadProductsFromDB() {
+  try {
+    const res = await fetch(`${BASE_URL}/api/product`);
+    const data = await res.json();
 
+    if (!Array.isArray(data)) {
+      throw new Error("Invalid response format");
+    }
+
+    products = data;
+    saveToLocalStorage();
+    refreshTable();
+    console.log("✅ Products loaded from backend");
+  } catch (err) {
+    console.warn("⚠️ Failed to load from backend, using localStorage instead.", err);
+    loadProductsFromStorage();
+  }
+}
+
+// Example usage
+fetch(`${BASE_URL}/api/users`);
 
 // Initialize the app
-document.addEventListener('DOMContentLoaded', function() {
-    loadProductsFromStorage();
+document.addEventListener('DOMContentLoaded', function () {
+  loadProductsFromDB();
 
-    // Real-time price calculation when inputs change
-    document.getElementById('regular-price').addEventListener('input', updatePurchasePriceDisplay);
-    document.getElementById('special-price').addEventListener('input', updatePurchasePriceDisplay);
-    document.getElementById('transport-price').addEventListener('input', updatePurchasePriceDisplay);
-    document.querySelectorAll('input[name="price-type"]').forEach(radio => {
-        radio.addEventListener('change', updatePurchasePriceDisplay);
+  document.getElementById('regular-price').addEventListener('input', updatePurchasePriceDisplay);
+  document.getElementById('special-price').addEventListener('input', updatePurchasePriceDisplay);
+  document.getElementById('transport-price').addEventListener('input', updatePurchasePriceDisplay);
+  document.querySelectorAll('input[name="price-type"]').forEach(radio => {
+    radio.addEventListener('change', updatePurchasePriceDisplay);
+  });
+
+  document.getElementById('transport-included').addEventListener('change', function () {
+    const group = document.getElementById('transport-price-group');
+    group.style.display = this.value === 'No' ? 'block' : 'none';
+    if (this.value !== 'No') document.getElementById('transport-price').value = '';
+    updatePurchasePriceDisplay();
+  });
+
+  productForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    saveProduct();
+  });
+
+  cancelEditBtn.addEventListener('click', resetForm);
+
+  document.getElementById('search-input').addEventListener('input', function () {
+    const search = this.value.toLowerCase();
+    document.querySelectorAll('#productTable tbody tr').forEach(row => {
+      const company = row.cells[1].innerText.toLowerCase();
+      const product = row.cells[2].innerText.toLowerCase();
+      row.style.display = (company.includes(search) || product.includes(search)) ? '' : 'none';
     });
-    
-    // Transport Included dropdown handler
-    document.getElementById('transport-included').addEventListener('change', function() {
-        const group = document.getElementById('transport-price-group');
-        if (this.value === 'No') {
-            group.style.display = 'block';
-        } else {
-            group.style.display = 'none';
-            document.getElementById('transport-price').value = '';
+  });
+
+  document.getElementById('createQuotationBtn').addEventListener('click', function () {
+    if (quotedProducts.length === 0) {
+      alert('Please add products to quotation first!');
+      return;
+    }
+    document.getElementById('quotationPopup').style.display = 'flex';
+  });
+
+  document.getElementById('receiver-form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const name = document.getElementById('receiver-name').value;
+    const org = document.getElementById('receiver-organization').value;
+    const addr = document.getElementById('receiver-address').value;
+    document.getElementById('receiverDetails').innerText = `${name}\n${org}\n${addr}`;
+    document.getElementById('quotationPopup').style.display = 'none';
+    document.getElementById('finalQuotationPopup').style.display = 'block';
+    renderQuotation();
+  });
+
+  document.getElementById('uploadCsvBtn').addEventListener('click', function () {
+    const fileInput = document.getElementById('csvFileInput');
+    const file = fileInput.files[0];
+
+    if (!file) {
+      alert('Please select a CSV file to upload.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+      try {
+        const csvContent = e.target.result;
+        const rows = csvContent.split('\n').map(row => row.split(','));
+        let newProductsCount = 0;
+
+        for (const row of rows.slice(1)) {
+          if (row.length < 13) continue;
+
+          const product = {
+            company: row[0]?.trim() || '',
+            productName: row[1]?.trim() || '',
+            regularPrice: parseFloat(row[2]?.trim()) || 0,
+            specialPrice: parseFloat(row[3]?.trim()) || 0,
+            transportIncluded: row[4]?.trim() === 'No' ? 'No' : 'Yes',
+            purchaseGST: row[5]?.trim() || '5',
+            transportPrice: parseFloat(row[6]?.trim()) || 0,
+            distributorPrice: parseFloat(row[7]?.trim()) || 0,
+            specialSalePrice: parseFloat(row[8]?.trim()) || 0,
+            institutionalPrice: parseFloat(row[9]?.trim()) || 0,
+            b2cPrice: parseFloat(row[10]?.trim()) || 0,
+            mrpPrice: parseFloat(row[11]?.trim()) || 0,
+            saleGST: row[12]?.trim() || '5',
+            priceType: 'regular'
+          };
+
+          products.push(product);
+          newProductsCount++;
+
+          try {
+            const res = await fetch(`${BASE_URL}/api/product`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(product),
+            });
+            const data = await res.json();
+            if (res.ok) product.id = data.id || data._id;
+          } catch (err) {
+            console.error("❌ Error saving CSV product to backend:", err);
+          }
         }
-        updatePurchasePriceDisplay();
-    });
 
-    
+        saveToLocalStorage();
+        refreshTable();
+        alert(`Added ${newProductsCount} new products from CSV (Total: ${products.length})`);
+      } catch (error) {
+        console.error('Error processing CSV:', error);
+        alert('Error processing CSV file. Please check the format.');
+      }
+    };
 
-    // Form submit handler
-    productForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        saveProduct();
-    });
+    reader.onerror = () => alert('Error reading file. Please try again.');
+    reader.readAsText(file);
+  });
 
-    // Cancel edit handler
-    cancelEditBtn.addEventListener('click', function() {
-        resetForm();
-    });
+  document.getElementById('productTable').addEventListener('click', function (e) {
+    if (e.target.classList.contains('add-quotation-btn')) {
+      const index = parseInt(e.target.getAttribute('data-index'));
+      addToQuotation(index);
+    }
+  });
 
-    // Search functionality
-    document.getElementById('search-input').addEventListener('input', function() {
-        const search = this.value.toLowerCase();
-        const rows = document.querySelectorAll('#productTable tbody tr');
-        rows.forEach(row => {
-            const company = row.cells[1].innerText.toLowerCase();
-            const product = row.cells[2].innerText.toLowerCase();
-            row.style.display = (company.includes(search) || product.includes(search)) ? '' : 'none';
-        });
-    });
-
-    // Quotation popup handlers
-    document.getElementById('createQuotationBtn').addEventListener('click', function() {
-        if (quotedProducts.length === 0) {
-            alert('Please add products to quotation first!');
-            return;
-        }
-        document.getElementById('quotationPopup').style.display = 'flex';
-    });
-
-    document.getElementById('receiver-form').addEventListener('submit', function(e) {
-        e.preventDefault();
-        const receiverName = document.getElementById('receiver-name').value;
-        const organization = document.getElementById('receiver-organization').value;
-        const address = document.getElementById('receiver-address').value;
-        
-        document.getElementById('receiverDetails').innerText = `${receiverName}\n${organization}\n${address}`;
-        document.getElementById('quotationPopup').style.display = 'none';
-        document.getElementById('finalQuotationPopup').style.display = 'block';
-        renderQuotation();
-    });
-
-    // CSV upload handler
-    document.getElementById('uploadCsvBtn').addEventListener('click', function() {
-        const fileInput = document.getElementById('csvFileInput');
-        const file = fileInput.files[0];
-
-        if (!file) {
-            alert('Please select a CSV file to upload.');
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const csvContent = e.target.result;
-                const rows = csvContent.split('\n').map(row => row.split(','));
-                
-                let newProductsCount = 0;
-                
-                rows.slice(1).forEach((row, index) => {
-                    if (row.length < 13) {
-                        console.warn('Skipping incomplete row:', row);
-                        return;
-                    }
-
-                    const product = {
-                        company: row[0]?.trim() || '',
-                        productName: row[1]?.trim() || '',
-                        regularPrice: parseFloat(row[2]?.trim()) || 0,
-                        specialPrice: parseFloat(row[3]?.trim()) || 0,
-                        transportIncluded: row[4]?.trim() === 'No' ? 'No' : 'Yes',
-                        purchaseGST: row[5]?.trim() || '5',
-                        transportPrice: parseFloat(row[6]?.trim()) || 0,
-                        distributorPrice: parseFloat(row[7]?.trim()) || 0,
-                        specialSalePrice: parseFloat(row[8]?.trim()) || 0,
-                        institutionalPrice: parseFloat(row[9]?.trim()) || 0,
-                        b2cPrice: parseFloat(row[10]?.trim()) || 0,
-                        mrpPrice: parseFloat(row[11]?.trim()) || 0,
-                        saleGST: row[12]?.trim() || '5',
-                        priceType: 'regular'
-                    };
-
-                    products.push(product);
-                    newProductsCount++;
-                });
-
-                saveToLocalStorage();
-                refreshTable();
-                alert(`Added ${newProductsCount} new products from CSV (Total: ${products.length})`);
-            } catch (error) {
-                console.error('Error processing CSV:', error);
-                alert('Error processing CSV file. Please check the format.');
-            }
-        };
-        
-        reader.onerror = function() {
-            alert('Error reading file. Please try again.');
-        };
-        
-        reader.readAsText(file);
-    });
-
-    // Handle clicks on Add to Quotation buttons
-    document.getElementById('productTable').addEventListener('click', function(e) {
-        if (e.target.classList.contains('add-quotation-btn')) {
-            const index = parseInt(e.target.getAttribute('data-index'));
-            addToQuotation(index);
-        }
-    });
-
-    // Export CSV handler
-    document.getElementById('exportCsvBtn').addEventListener('click', exportProductsToCSV);
+  document.getElementById('exportCsvBtn').addEventListener('click', exportProductsToCSV);
 });
+
 
 // Load products from localStorage
 function loadProductsFromStorage() {
-    const storedProducts = localStorage.getItem('products');
+    const storedProducts = localStorage.getItem('products');    
     if (storedProducts) {
         products = JSON.parse(storedProducts);
         refreshTable();
@@ -204,39 +210,79 @@ function updatePurchasePriceDisplay() {
     const purchasePrice = calculatePurchasePrice(formData);
     document.querySelector('.gap').textContent = purchasePrice;
 }
+//save product fun
+async function saveProduct() {
+  const productData = {
+    company: document.getElementById('company-name').value,
+    productName: document.getElementById('product-name').value,
+    regularPrice: parseFloat(document.getElementById('regular-price').value) || 0,
+    specialPrice: parseFloat(document.getElementById('special-price').value) || 0,
+    transportIncluded: document.getElementById('transport-included').value,
+    transportPrice: parseFloat(document.getElementById('transport-price').value) || 0,
+    priceType: document.querySelector('input[name="price-type"]:checked').value,
+    purchaseGST: document.getElementById('purchase-gst').value,
+    distributorPrice: parseFloat(document.getElementById('distributor-price').value) || 0,
+    specialSalePrice: parseFloat(document.getElementById('special-sale-price').value) || 0,
+    institutionalPrice: parseFloat(document.getElementById('institutional-price').value) || 0,
+    b2cPrice: parseFloat(document.getElementById('b2c-price').value) || 0,
+    mrpPrice: parseFloat(document.getElementById('mrp-price').value) || 0,
+    saleGST: document.getElementById('sale-gst').value
+  };
 
-// Save product function
-function saveProduct() {
-    const productData = {
-        company: document.getElementById('company-name').value,
-        productName: document.getElementById('product-name').value,
-        regularPrice: parseFloat(document.getElementById('regular-price').value) || 0,
-        specialPrice: parseFloat(document.getElementById('special-price').value) || 0,
-        transportIncluded: document.getElementById('transport-included').value,
-        transportPrice: parseFloat(document.getElementById('transport-price').value) || 0,
-        priceType: document.querySelector('input[name="price-type"]:checked').value,
-        purchaseGST: document.getElementById('purchase-gst').value,
-        distributorPrice: parseFloat(document.getElementById('distributor-price').value) || 0,
-        specialSalePrice: parseFloat(document.getElementById('special-sale-price').value) || 0,
-        institutionalPrice: parseFloat(document.getElementById('institutional-price').value) || 0,
-        b2cPrice: parseFloat(document.getElementById('b2c-price').value) || 0,
-        mrpPrice: parseFloat(document.getElementById('mrp-price').value) || 0,
-        saleGST: document.getElementById('sale-gst').value
-    };
+  const purchasePrice = calculatePurchasePrice(productData);
+  const salePrice = (productData.distributorPrice * (1 + parseFloat(productData.saleGST) / 100)).toFixed(2);
 
-    const purchasePrice = calculatePurchasePrice(productData);
-    const salePrice = (productData.distributorPrice * (1 + parseFloat(productData.saleGST) / 100)).toFixed(2);
+  if (editingIndex !== null) {
+    products[editingIndex] = productData;
+    updateTableRow(editingIndex, productData, purchasePrice, salePrice);
+  } else {
+    products.push(productData);
+    addTableRow(products.length - 1, productData, purchasePrice, salePrice);
+  }
 
-    if (editingIndex !== null) {
-        products[editingIndex] = productData;
-        updateTableRow(editingIndex, productData, purchasePrice, salePrice);
-    } else {
-        products.push(productData);
-        addTableRow(products.length - 1, productData, purchasePrice, salePrice);
+  saveToLocalStorage();
+  resetForm();
+
+  // ✅ Backend Sync Logic
+  if (editingIndex === null) {
+    // Create new product
+    try {
+      const res = await fetch(`${BASE_URL}/api/product`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(productData),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        console.log('✅ Product saved to backend:', data);
+        products[products.length - 1].id = data.id || data._id;
+      } else {
+        console.warn('⚠️ Failed to save product to backend:', data.message || data);
+      }
+    } catch (err) {
+      console.error('❌ Backend error (add):', err);
     }
-
-    saveToLocalStorage();
-    resetForm();
+  } else {
+    // Update existing product
+    const productId = products[editingIndex]?.id;
+    if (productId) {
+      try {
+        const res = await fetch(`${BASE_URL}/api/product/${productId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(productData),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          console.log('📝 Product updated in backend:', data);
+        } else {
+          console.warn('⚠️ Failed to update product in backend:', data.message || data);
+        }
+      } catch (err) {
+        console.error('❌ Backend error (update):', err);
+      }
+    }
+  }
 }
 
 // Rest of the code remains the same until quotation functions...
@@ -470,15 +516,31 @@ function exportProductsToCSV() {
 }
 
 // Delete product function
-function deleteProduct(index) {
-    if (confirm('Are you sure you want to delete this product?')) {
-        products.splice(index, 1);
-        saveToLocalStorage();
-        refreshTable();
-        if (editingIndex === index) {
-            resetForm();
-        }
+async function deleteProduct(index) {
+  if (!confirm('Are you sure you want to delete this product?')) return;
+
+  const productId = products[index]?.id;
+  if (productId) {
+    try {
+      const res = await fetch(`${BASE_URL}/api/product/${productId}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        console.log('🗑️ Product deleted from backend');
+      } else {
+        console.warn('⚠️ Failed to delete from backend');
+      }
+    } catch (err) {
+      console.error('❌ Backend error (delete):', err);
     }
+  }
+
+  products.splice(index, 1);
+  saveToLocalStorage();
+  refreshTable();
+  if (editingIndex === index) {
+    resetForm();
+  }
 }
 
 // Refresh the entire table
