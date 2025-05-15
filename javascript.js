@@ -7,6 +7,7 @@ let editingIndex = null;
 const productForm = document.getElementById('product-form');
 const submitBtn = document.getElementById('submitProductBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
+
 const BASE_URL = "https://quotation-backend-2vww.onrender.com";
 
 // Load products from backend
