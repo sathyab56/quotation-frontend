@@ -10,7 +10,13 @@ const cancelEditBtn = document.getElementById('cancelEditBtn');
 const BASE_URL = "https://quotation-backend-2vww.onrender.com";
 
 // Example usage:
-fetch("https://quotation-backend-2vww.onrender.com/products")
+fetch(`${BASE_URL}/products`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(productData),
+});
 
 
 // Initialize the app
