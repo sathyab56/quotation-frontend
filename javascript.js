@@ -30,7 +30,7 @@ async function loadProductsFromDB() {
 }
 
 // Example usage
-//fetch(`${BASE_URL}/users`);
+fetch(`${BASE_URL}/users`);
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function () {
