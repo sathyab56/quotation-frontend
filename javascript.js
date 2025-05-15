@@ -12,7 +12,7 @@ const BASE_URL = "https://quotation-backend-2vww.onrender.com";
 // Load products from backend
 async function loadProductsFromDB() {
   try {
-    const res = await fetch(`${BASE_URL}/api/products`);
+    const res = await fetch(`${BASE_URL}/products`);
     const data = await res.json();
 
     if (!Array.isArray(data)) {
@@ -30,7 +30,7 @@ async function loadProductsFromDB() {
 }
 
 // Example usage
-fetch(`${BASE_URL}/api/users`);
+//fetch(`${BASE_URL}/users`);
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function () {
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
           newProductsCount++;
 
           try {
-            const res = await fetch(`${BASE_URL}/api/products`, {
+            const res = await fetch(`${BASE_URL}/products`, {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(product),
@@ -247,7 +247,7 @@ async function saveProduct() {
   if (editingIndex === null) {
     // Create new product
     try {
-      const res = await fetch(`${BASE_URL}/api/products`, {
+      const res = await fetch(`${BASE_URL}/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(productData),
@@ -267,7 +267,7 @@ async function saveProduct() {
     const productId = products[editingIndex]?.id;
     if (productId) {
       try {
-        const res = await fetch(`${BASE_URL}/api/products/${productId}`, {
+        const res = await fetch(`${BASE_URL}/products/${productId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(productData),
@@ -522,7 +522,7 @@ async function deleteProduct(index) {
   const productId = products[index]?.id;
   if (productId) {
     try {
-      const res = await fetch(`${BASE_URL}/api/products/${productId}`, {
+      const res = await fetch(`${BASE_URL}/products/${productId}`, {
         method: 'DELETE',
       });
       if (res.ok) {
