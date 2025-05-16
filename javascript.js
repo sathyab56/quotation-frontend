@@ -8,12 +8,17 @@ const productForm = document.getElementById('product-form');
 const submitBtn = document.getElementById('submitProductBtn');
 const cancelEditBtn = document.getElementById('cancelEditBtn');
 
+
+
 const BASE_URL = "https://quotation-backend-2vww.onrender.com";
+// const BASE_URL = "http://localhost:10000";
+
 
 // Load products from backend
 async function loadProductsFromDB() {
   try {
-    const res = await fetch(`${BASE_URL}/products`);
+    const res = await fetch(`${BASE_URL}/get`);
+    console.log(res);
     const data = await res.json();
 
     if (!Array.isArray(data)) {
@@ -21,17 +26,17 @@ async function loadProductsFromDB() {
     }
 
     products = data;
-    saveToLocalStorage();
+    // saveToLocalStorage();
     refreshTable();
     console.log("✅ Products loaded from backend");
   } catch (err) {
     console.warn("⚠️ Failed to load from backend, using localStorage instead.", err);
-    loadProductsFromStorage();
+    // loadProductsFromStorage();
   }
 }
 
 // Example usage
-fetch(`${BASE_URL}/users`);
+// fetch(`${BASE_URL}/users`);
 
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function () {
@@ -86,70 +91,147 @@ document.addEventListener('DOMContentLoaded', function () {
     renderQuotation();
   });
 
+  // document.getElementById('uploadCsvBtn').addEventListener('click', function () {
+  //   const fileInput = document.getElementById('csvFileInput');
+  //   const file = fileInput.files[0];
+
+  //   if (!file) {
+  //     alert('Please select a CSV file to upload.');
+  //     return;
+  //   }
+
+  //   const reader = new FileReader();
+  //   reader.onload = async function (e) {
+  //     try {
+  //       const csvContent = e.target.result;
+  //       const rows = csvContent.split('\n').map(row => row.split(','));
+  //       let newProductsCount = 0;
+
+  //       for (const row of rows.slice(1)) {
+  //         if (row.length < 13) continue;
+
+  //         const product = {
+  //           company: row[0]?.trim() || '',
+  //           productName: row[1]?.trim() || '',
+  //           regularPrice: parseFloat(row[2]?.trim()) || 0,
+  //           specialPrice: parseFloat(row[3]?.trim()) || 0,
+  //           transportIncluded: row[4]?.trim() === 'No' ? 'No' : 'Yes',
+  //           purchaseGST: row[5]?.trim() || '5',
+  //           transportPrice: parseFloat(row[6]?.trim()) || 0,
+  //           distributorPrice: parseFloat(row[7]?.trim()) || 0,
+  //           specialSalePrice: parseFloat(row[8]?.trim()) || 0,
+  //           institutionalPrice: parseFloat(row[9]?.trim()) || 0,
+  //           b2cPrice: parseFloat(row[10]?.trim()) || 0,
+  //           mrpPrice: parseFloat(row[11]?.trim()) || 0,
+  //           saleGST: row[12]?.trim() || '5',
+  //           priceType: 'regular'
+  //         };
+
+  //         products.push(product);
+  //         newProductsCount++;
+
+  //         try {
+  //           const res = await fetch(`${BASE_URL}/products`, {
+  //             method: "POST",
+  //             headers: { "Content-Type": "application/json" },
+  //             body: JSON.stringify(product),
+  //           });
+  //           const data = await res.json();
+  //           if (res.ok) product.id = data.id || data._id;
+  //         } catch (err) {
+  //           console.error("❌ Error saving CSV product to backend:", err);
+  //         }
+  //       }
+
+  //       // saveToLocalStorage();
+  //       refreshTable();
+  //       alert(`Added ${newProductsCount} new products from CSV (Total: ${products.length})`);
+  //     } catch (error) {
+  //       console.error('Error processing CSV:', error);
+  //       alert('Error processing CSV file. Please check the format.');
+  //     }
+  //   };
+
+  //   reader.onerror = () => alert('Error reading file. Please try again.');
+  //   reader.readAsText(file);
+  // });
   document.getElementById('uploadCsvBtn').addEventListener('click', function () {
-    const fileInput = document.getElementById('csvFileInput');
-    const file = fileInput.files[0];
+  const fileInput = document.getElementById('csvFileInput');
+  const file = fileInput.files[0];
 
-    if (!file) {
-      alert('Please select a CSV file to upload.');
-      return;
-    }
+  if (!file) {
+    alert('Please select a CSV file to upload.');
+    return;
+  }
 
-    const reader = new FileReader();
-    reader.onload = async function (e) {
-      try {
-        const csvContent = e.target.result;
-        const rows = csvContent.split('\n').map(row => row.split(','));
-        let newProductsCount = 0;
+  const reader = new FileReader();
+  reader.onload = async function (e) {
+    try {
+      const csvContent = e.target.result;
 
-        for (const row of rows.slice(1)) {
-          if (row.length < 13) continue;
+      // Parse CSV with PapaParse, header:true to get objects by header name
+      const parsed = Papa.parse(csvContent, {
+        header: true,
+        skipEmptyLines: true,
+      });
 
-          const product = {
-            company: row[0]?.trim() || '',
-            productName: row[1]?.trim() || '',
-            regularPrice: parseFloat(row[2]?.trim()) || 0,
-            specialPrice: parseFloat(row[3]?.trim()) || 0,
-            transportIncluded: row[4]?.trim() === 'No' ? 'No' : 'Yes',
-            purchaseGST: row[5]?.trim() || '5',
-            transportPrice: parseFloat(row[6]?.trim()) || 0,
-            distributorPrice: parseFloat(row[7]?.trim()) || 0,
-            specialSalePrice: parseFloat(row[8]?.trim()) || 0,
-            institutionalPrice: parseFloat(row[9]?.trim()) || 0,
-            b2cPrice: parseFloat(row[10]?.trim()) || 0,
-            mrpPrice: parseFloat(row[11]?.trim()) || 0,
-            saleGST: row[12]?.trim() || '5',
-            priceType: 'regular'
-          };
-
-          products.push(product);
-          newProductsCount++;
-
-          try {
-            const res = await fetch(`${BASE_URL}/products`, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(product),
-            });
-            const data = await res.json();
-            if (res.ok) product.id = data.id || data._id;
-          } catch (err) {
-            console.error("❌ Error saving CSV product to backend:", err);
-          }
-        }
-
-        saveToLocalStorage();
-        refreshTable();
-        alert(`Added ${newProductsCount} new products from CSV (Total: ${products.length})`);
-      } catch (error) {
-        console.error('Error processing CSV:', error);
-        alert('Error processing CSV file. Please check the format.');
+      if (parsed.errors.length) {
+        console.warn("CSV parsing errors:", parsed.errors);
+        alert("There are some errors in your CSV file. Please check and try again.");
+        return;
       }
-    };
 
-    reader.onerror = () => alert('Error reading file. Please try again.');
-    reader.readAsText(file);
-  });
+      let newProductsCount = 0;
+
+      for (const row of parsed.data) {
+        // Defensive checks for required fields can be added here
+        if (!row['Company'] || !row['Product Name']) continue;
+
+        const product = {
+          company: row['Company']?.trim() || '',
+          productName: row['Product Name']?.trim() || '',
+          regularPrice: parseFloat(row['Regular Price']) || 0,
+          specialPrice: parseFloat(row['Special Price']) || 0,
+          transportIncluded: row['Transport']?.trim() === 'No' ? 'No' : 'Yes',
+          purchaseGST: row['Purchase GST']?.trim() || '5',
+          transportPrice: parseFloat(row['Transport Price']) || 0,
+          distributorPrice: parseFloat(row['Distributor Price']) || 0,
+          specialSalePrice: parseFloat(row['Special Sale']) || 0,
+          institutionalPrice: parseFloat(row['Institutional']) || 0,
+          b2cPrice: parseFloat(row['B2C']) || 0,
+          mrpPrice: parseFloat(row['MRP']) || 0,
+          saleGST: row['Sale GST']?.trim() || '5',
+          priceType: 'regular'
+        };
+
+        products.push(product);
+        newProductsCount++;
+
+        try {
+          const res = await fetch(`${BASE_URL}/products`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(product),
+          });
+          const data = await res.json();
+          if (res.ok) product.id = data.id || data._id;
+        } catch (err) {
+          console.error("❌ Error saving CSV product to backend:", err);
+        }
+      }
+
+      refreshTable();
+      alert(`Added ${newProductsCount} new products from CSV (Total: ${products.length})`);
+    } catch (error) {
+      console.error('Error processing CSV:', error);
+      alert('Error processing CSV file. Please check the format.');
+    }
+  };
+
+  reader.onerror = () => alert('Error reading file. Please try again.');
+  reader.readAsText(file);
+});
+
 
   document.getElementById('productTable').addEventListener('click', function (e) {
     if (e.target.classList.contains('add-quotation-btn')) {
@@ -163,18 +245,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 // Load products from localStorage
-function loadProductsFromStorage() {
-    const storedProducts = localStorage.getItem('products');    
-    if (storedProducts) {
-        products = JSON.parse(storedProducts);
-        refreshTable();
-    }
-}
+// function loadProductsFromStorage() {
+//     const storedProducts = localStorage.getItem('products');    
+//     if (storedProducts) {
+//         products = JSON.parse(storedProducts);
+//         refreshTable();
+//     }
+// }
 
 // Save products to localStorage
-function saveToLocalStorage() {
-    localStorage.setItem('products', JSON.stringify(products));
-}
+// function saveToLocalStorage() {
+//     localStorage.setItem('products', JSON.stringify(products));
+// }
 
 // Calculate purchase price with GST
 function calculatePurchasePrice(product) {
@@ -195,9 +277,17 @@ function calculatePurchasePrice(product) {
     return totalWithGST.toFixed(2);
 }
 
+function closeReceiverPopup() {
+  const popup = document.getElementById('quotationPopup');
+  if (popup) {
+    popup.style.display = 'none';
+  }
+}
+
+
 // Update purchase price display
 function updatePurchasePriceDisplay() {
-    if (!productForm.reportValidity()) return;
+    // if (!productForm.reportValidity()) return;
     
     const formData = {
         priceType: document.querySelector('input[name="price-type"]:checked').value,
@@ -211,8 +301,19 @@ function updatePurchasePriceDisplay() {
     const purchasePrice = calculatePurchasePrice(formData);
     document.querySelector('.gap').textContent = purchasePrice;
 }
+
+// submitBtn.addEventListener('click', () => {
+//   if (submitBtn.textContent === 'Update Product') {
+//     submitBtn.classList.add('updating'); // 👈 Add your desired class
+//     // updateProduct();  // Call your update function
+//   } else {
+//     saveProduct();  // Call your add function
+//   }
+// });
+
 //save product fun
 async function saveProduct() {
+  // e.preventDefault();
   const productData = {
     company: document.getElementById('company-name').value,
     productName: document.getElementById('product-name').value,
@@ -241,7 +342,7 @@ async function saveProduct() {
     addTableRow(products.length - 1, productData, purchasePrice, salePrice);
   }
 
-  saveToLocalStorage();
+  // saveToLocalStorage();
   resetForm();
 
   // ✅ Backend Sync Logic
@@ -286,7 +387,42 @@ async function saveProduct() {
   }
 }
 
-// Rest of the code remains the same until quotation functions...
+async function updateProduct(index) {
+  alert("hii")
+  alert(index);
+  // const productId = document.getElementById('productId').value; // or however you store the product id
+  // const productData = {
+  //   name: nameInput.value,
+  //   price: priceInput.value,
+  //   description: descriptionInput.value,
+  //   stock: stockInput.value,
+  //   category: categoryInput.value
+  // };
+
+  // try {
+  //   const response = await fetch(`/api/products/${productId}`, {
+  //     method: 'PUT',
+  //     headers: {
+  //       'Content-Type': 'application/json'
+  //     },
+  //     body: JSON.stringify(productData)
+  //   });
+
+  //   const result = await response.json();
+  //   if (response.ok) {
+  //     alert('Product updated successfully!');
+  //     submitBtn.textContent = 'Add Product'; // reset button text
+  //   } else {
+  //     alert(result.message || 'Update failed.');
+  //   }
+  // } catch (err) {
+  //   alert('Error: ' + err.message);
+  // }
+  console.log("hii");
+}
+
+
+
 
 // Edit product function
 function editProduct(index) {
@@ -314,9 +450,92 @@ function editProduct(index) {
     document.getElementById('transport-price-group').style.display = product.transportIncluded === 'No' ? 'block' : 'none';
 
     submitBtn.textContent = 'Update Product';
+    
+    //   if (submitBtn.textContent === 'Update Product') {
+  //     console.log("hii")
+      
+  //   // submitBtn.classList.add('updating'); // 👈 Add your desired class
+  //   // updateProduct();  // Call your update function
+  // } else {
+  //   saveProduct();  // Call your add function
+  // }
     cancelEditBtn.style.display = 'inline-block';
     productForm.scrollIntoView({ behavior: 'smooth' });
 }
+
+submitBtn.addEventListener('click', async (e) => {
+  e.preventDefault();
+  // alert("hii right");
+  if (submitBtn.textContent === 'Update Product') {
+    console.log(products);
+    const productId = products[editingIndex].id; // from the global index
+    const updatedProduct = {
+      company: document.getElementById('company-name').value,
+      productName: document.getElementById('product-name').value,
+      regularPrice: document.getElementById('regular-price').value,
+      specialPrice: document.getElementById('special-price').value,
+      transportIncluded: document.getElementById('transport-included').value,
+      purchaseGST: document.getElementById('purchase-gst').value,
+      distributorPrice: document.getElementById('distributor-price').value,
+      specialSalePrice: document.getElementById('special-sale-price').value,
+      institutionalPrice: document.getElementById('institutional-price').value,
+      b2cPrice: document.getElementById('b2c-price').value,
+      mrpPrice: document.getElementById('mrp-price').value,
+      saleGST: document.getElementById('sale-gst').value,
+      transportPrice: document.getElementById('transport-price').value,
+      priceType: document.querySelector('input[name="price-type"]:checked').value
+    };
+
+    console.log(productId)
+
+    try {
+      await axios.put(`${BASE_URL}/${productId}`, updatedProduct);
+      alert('✅ Product updated su1ccessfully');
+      loadProductsFromDB();
+      // fetchAndUpdateProducts(); // reload the table
+      resetForm(); // optional: reset the form
+    } catch (error) {
+      console.error('❌ Failed to update product:', error);
+      alert('❌ Update failed: ' + error.message);
+    }
+  } else {
+    saveProduct(); // fallback for add
+  }
+});
+
+
+
+// document.querySelectorAll('.updating').forEach((btn, index) => {
+//   btn.addEventListener('click', async () => {
+//     // You might need to get the correct product ID or data for this index
+//     const product = products[index]; // Make sure `products` is available
+//     alert("hii");
+//     try {
+//       const response = await axios.put(`${BASE_URL}/products/${product._id}`, {
+//         company: product.company,
+//         productName: product.productName,
+//         regularPrice: product.regularPrice,
+//         specialPrice: product.specialPrice,
+//         transportIncluded: product.transportIncluded,
+//         purchaseGST: product.purchaseGST,
+//         distributorPrice: product.distributorPrice,
+//         specialSalePrice: product.specialSalePrice,
+//         institutionalPrice: product.institutionalPrice,
+//         b2cPrice: product.b2cPrice,
+//         mrpPrice: product.mrpPrice,
+//         saleGST: product.saleGST,
+//         transportPrice: product.transportPrice,
+//         priceType: product.priceType
+//       });
+
+//       alert('✅ Product updated successfully');
+//       fetchAndUpdateProducts(); // refresh the product table
+//     } catch (error) {
+//       console.error('❌ Failed to update product:', error);
+//       alert('❌ Update failed: ' + error.message);
+//     }
+//   });
+// });
 
 // Add new row to table
 function addTableRow(index, productData, purchasePrice, salePrice) {
@@ -365,8 +584,49 @@ function addTableRow(index, productData, purchasePrice, salePrice) {
     newRow.querySelector('.delete-btn').addEventListener('click', function() {
         deleteProduct(index);
     });
+    //it is for updating in db
+    //  newRow.querySelector('.updating').addEventListener('click', function() {
+    //     updateProduct(index);
+    // });
+
+    
 }
 
+//abrar
+
+
+// async function fetchAndUpdateProducts() {
+//   try {
+//     const response = await axios.get(`${BASE_URL}/get`); // Adjust the URL
+//     const products = response.data; // Assuming your API returns an array of products
+
+//     const tableBody = document.getElementById('productTable').getElementsByTagName('tbody')[0];
+//     tableBody.innerHTML = ''; // Clear existing rows before rendering new data
+
+//     products.forEach((product, index) => {
+//       // Calculate purchasePrice and salePrice if needed, or get from product
+//       const purchasePrice = (parseFloat(product.regularPrice) + parseFloat(product.purchaseGST || 0)).toFixed(2);
+//       const salePrice = (parseFloat(product.distributorPrice) + parseFloat(product.saleGST || 0)).toFixed(2);
+
+//       // Create a new row
+//       const row = tableBody.insertRow();
+
+//       // Insert cells
+//       for (let i = 0; i < 17; i++) {
+//         row.insertCell();
+//       }
+
+//       // Use your existing function to update row cells
+//       updateTableRow(index, product, purchasePrice, salePrice);
+//     });
+
+//     console.log('✅ Products updated in table');
+//   } catch (error) {
+//     console.error('❌ Error fetching products:', error);
+//   }
+// }
+
+// Call this function when you want to load and update the table
 // Update existing row
 function updateTableRow(index, productData, purchasePrice, salePrice) {
     const table = document.getElementById('productTable').getElementsByTagName('tbody')[0];
@@ -523,7 +783,7 @@ async function deleteProduct(index) {
   const productId = products[index]?.id;
   if (productId) {
     try {
-      const res = await fetch(`${BASE_URL}/products/${productId}`, {
+      const res = await fetch(`${BASE_URL}/${productId}`, {
         method: 'DELETE',
       });
       if (res.ok) {
@@ -537,7 +797,7 @@ async function deleteProduct(index) {
   }
 
   products.splice(index, 1);
-  saveToLocalStorage();
+  // saveToLocalStorage();
   refreshTable();
   if (editingIndex === index) {
     resetForm();

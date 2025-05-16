@@ -14,6 +14,8 @@ document.getElementById("signup-form").addEventListener("submit", async function
 
   try {
     const result = await axios.post("https://quotation-backend-2vww.onrender.com/signup", payload);
+    // const result = await axios.post("http://localhost:10000/signup", payload);
+
     console.log("Signed up successfully", result.status);
     alert("Signed up successfully");
     window.location.href = "index.html";
@@ -37,12 +39,14 @@ document.getElementById("login-form").addEventListener("submit", async function 
 
   try {
     const response = await axios.post("https://quotation-backend-2vww.onrender.com/signin", { email, password });
+    // const response = await axios.post("http://localhost:10000/signin", { email, password });
+
 
 
     if (response.status === 200) {
       alert("Logged in successfully");
       localStorage.setItem("email", email);
-      localStorage.setItem("product", response.data.details?.processingData || "");
+
       window.location.href = "home.html";
     } else {
       alert(response.data.message || "Login failed.");
@@ -55,3 +59,5 @@ document.getElementById("login-form").addEventListener("submit", async function 
     alert(message);
   }
 });
+
+
